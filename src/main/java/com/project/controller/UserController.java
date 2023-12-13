@@ -2,6 +2,7 @@ package com.project.controller;
 
 import com.project.entity.concretes.user.User;
 import com.project.payload.request.user.UserRequest;
+import com.project.payload.request.user.UserRequestWithoutPassword;
 import com.project.payload.response.ResponseMessage;
 import com.project.payload.response.UserResponse;
 import com.project.payload.response.abstracts.BaseUserResponse;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -58,7 +60,22 @@ public class UserController {
     @PutMapping("/update/{userId}") // http://localhost:8080/user/update/1 + PUT + JSON
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseMessage<BaseUserResponse> updateAdminDeanViceDeanForAdmin(@RequestBody @Valid UserRequest userRequest,
-                                                              @PathVariable Long userId){
-        return userService.updateUser(userRequest,userId);
+                                                                             @PathVariable Long userId) {
+        return userService.updateUser(userRequest, userId);
+    }
+
+    // password bilgisi kullanılmasın
+    @PatchMapping("/updateUser") // http://localhost:8080/user/updateUser/2 + PATCH
+    @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER','TEACHER')")
+    public ResponseEntity<String> updateUserForUsers(@RequestBody @Valid
+                                                     UserRequestWithoutPassword userRequestWithoutPassword,
+                                                     HttpServletRequest request) {
+        return userService.updateUserForUsers(userRequestWithoutPassword, request);
+    }
+
+    @GetMapping("/getUserByName") // http://localhost:8080/user/getUserByName/ + GET
+    @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER')")
+    public List<UserResponse> getUserByName(@RequestParam(name ="name") String name){
+        return userService.getUserByName(name);
     }
 }

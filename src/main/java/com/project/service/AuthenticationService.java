@@ -24,6 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +33,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Component
 @RequiredArgsConstructor
 public class AuthenticationService {
     private final UserRepository userRepository;
@@ -68,7 +70,7 @@ public class AuthenticationService {
 
     public UserResponse findByUsername(String username) {
         User user = userRepository.findByUsername(username);
-        return userMapper.mapUserToResponse(user);
+        return userMapper.mapUserToUserResponse(user);
     }
 
     public void updatePassword(UpdatePasswordRequest updatePasswordRequest, HttpServletRequest request) {
