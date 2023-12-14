@@ -61,7 +61,7 @@ public class UserService {
         } else if (userRole.equalsIgnoreCase("ViceDean")) {
             user.setUserRole(userRoleService.getUserRole(RoleType.ASSISTANT_MANGER));
         } else {
-            throw new ResourceNotFoundException(String.format(ErrorMessages.NOT_FOUND_USER_USER_ROLE_MESSAGE, userRole));
+            throw new ResourceNotFoundException(String.format(ErrorMessages.NOT_FOUND_USER_USERROLE_MESSAGE, userRole));
         }
         // password encode edilecek
         user.setPassword(passwordEncoder.encode(userRequest.getPassword())); // user.getPassword() de olur
