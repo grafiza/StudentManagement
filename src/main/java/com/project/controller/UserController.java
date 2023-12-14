@@ -24,7 +24,7 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @PostMapping("/save/{userRole}") // http://localhost:8080/user/save/Admin + POST + JSON
+        @PostMapping("/save/{userRole}") // http://localhost:8080/user/save/Admin + POST + JSON
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<ResponseMessage<UserResponse>> saveUser(@RequestBody @Valid UserRequest userRequest,
                                                                   @PathVariable String userRole) {
@@ -73,7 +73,7 @@ public class UserController {
         return userService.updateUserForUsers(userRequestWithoutPassword, request);
     }
 
-    @GetMapping("/getUserByName") // http://localhost:8080/user/getUserByName/ + GET
+        @GetMapping("/getUserByName") // http://localhost:8080/user/getUserByName/ + GET
     @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER')")
     public List<UserResponse> getUserByName(@RequestParam(name ="name") String name){
         return userService.getUserByName(name);

@@ -38,7 +38,7 @@ public abstract class AbstractUserRequest {
     private LocalDate birthDay;
 
     @NotNull(message = "Please enter your ssn")
-    @Pattern(regexp = "^[1-9]{1}[0-9]{9}[02468]{1}$", // tc ile değiştirdim
+    @Pattern(regexp = "^(?!000|666)[0-8][0-9]{2}-(?!00)[0-9]{2}-(?!0000)[0-9]{4}$",
             message = "Please enter valid SSN number")
     private String ssn;
 
