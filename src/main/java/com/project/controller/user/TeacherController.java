@@ -1,5 +1,6 @@
 package com.project.controller.user;
 
+import com.project.entity.concretes.user.User;
 import com.project.payload.request.user.TeacherRequest;
 import com.project.payload.response.ResponseMessage;
 import com.project.payload.response.UserResponse;
@@ -40,8 +41,8 @@ public class TeacherController {
 
     @GetMapping("/getAllStudentByAdvisorUsername") // http://localhost:8080/teacher/getAllStudentByAdvisorUsername/
     @PreAuthorize("hasAnyAuthority('TEACHER')")
-    public List<StudentResponse> getAllStudentByAdvisorUsername(HttpServletRequest request){
-        String userName= request.getHeader("username");
+    public List<StudentResponse> getAllStudentByAdvisorUsername(HttpServletRequest request) {
+        String userName = request.getHeader("username");
         return teacherService.getAllStudentByAdvisorUsername(userName);
 
     }
@@ -50,8 +51,21 @@ public class TeacherController {
 
     @PatchMapping("/saveAdvisorTeacher/{teacherId}") // http://localhost:8080/teacher/saveAdvisorTeacher/2 + PATCH
     @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER')")
-    public ResponseMessage<UserResponse> saveAdvisorTeacher(@PathVariable Long teacherId){
+    public ResponseMessage<UserResponse> saveAdvisorTeacher(@PathVariable Long teacherId) {
         return teacherService.saveAdvisorTeacher(teacherId);
     }
+
+    @DeleteMapping("/deleteAdvisorTeacherById/{id}")  // http://localhost:8080/teacher/deleteAdvisorTeacherById/1
+    @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER')")
+    public ResponseMessage<UserResponse> deleteAdvisorTeacherById(@PathVariable Long id) {
+        return teacherService.deleteAdvisorTeacherById(id);
+    }
+
+    @GetMapping("/getAllAdvisorTeacher") // http://localhost:8080/teacher/getAllAdvisorTeacher
+    @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER')")
+    public List<UserResponse> getAllAdvisorTeacher(){
+        return teacherService.getAllAdvisorTeacher();
+    }
+
 
 }
