@@ -77,7 +77,7 @@ public class UserService {
 
 
     public Page<UserResponse> getUserByPage(int page, int size, String sort, String type, String userRole) {
-        Pageable pageable = pageableHelper.getPageableWithProperties(page, size, sort, type);
+        Pageable pageable =  pageableHelper.getPageableWithProperties(page, size, sort, type);
         return userRepository.findByUserByRole(userRole, pageable).map(userMapper::mapUserToUserResponse);
     }
 

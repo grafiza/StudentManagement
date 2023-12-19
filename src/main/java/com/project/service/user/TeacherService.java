@@ -2,10 +2,13 @@ package com.project.service.user;
 
 import com.project.entity.concretes.user.User;
 import com.project.entity.enums.RoleType;
+import com.project.exception.ConflictException;
 import com.project.payload.mappers.UserMapper;
+import com.project.payload.messages.ErrorMessages;
 import com.project.payload.messages.SuccessMessages;
 import com.project.payload.request.user.TeacherRequest;
 import com.project.payload.response.ResponseMessage;
+import com.project.payload.response.UserResponse;
 import com.project.payload.response.user.StudentResponse;
 import com.project.payload.response.user.TeacherResponse;
 import com.project.repository.UserRepository;
@@ -18,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -80,6 +84,29 @@ public class TeacherService {
     }
 
     public List<StudentResponse> getAllStudentByAdvisorUsername(String userName) {
-        return null;
+        User teacher = methodHelper.isUserExistByUsername(userName);
+        // isAdvisor
+        methodHelper.checkAdvisor(teacher);
+        return userRepository.findByAdvisorTeacherId(teacher.getId())
+                .stream()
+                .map(userMapper::mapUserToStudentResponse)
+                .collect(Collectors.toList());
+    }
+
+    public ResponseMessage<UserResponse> saveAdvisorTeacher(Long teacherId) {
+        User teacher = methodHelper.isUserExist(teacherId);
+        // teacher mı kontrolü
+        methodHelper.checkRole(teacher, RoleType.TEACHER);
+        // id ile gelen teacher zaten advisor mı
+        if (Boolean.TRUE.equals(teacher.getIsAdvisor())) {
+            throw new ConflictException(String.format(ErrorMessages.ALREADY_EXIST_ADVISOR_MESSAGE, teacherId));
+        }
+        teacher.setIsAdvisor(Boolean.TRUE);
+        userRepository.save(teacher);
+        return ResponseMessage.<UserResponse>builder()
+                .message(SuccessMessages.ADVISOR_TEACHER_SAVE)
+                .object(userMapper.mapUserToUserResponse(teacher))
+                .status(HttpStatus.OK)
+                .build();
     }
 }
