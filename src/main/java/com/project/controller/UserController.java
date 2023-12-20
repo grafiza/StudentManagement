@@ -41,8 +41,9 @@ public class UserController {
             @RequestParam(value = "sort", defaultValue = "name") String sort,
             @RequestParam(value = "type", defaultValue = "desc") String type
     ) {
-        Page<UserResponse> adminIrDeans = userService.getUserByPage(page, size, sort, type, userRole);
-        return new ResponseEntity<>(adminIrDeans, HttpStatus.OK);
+        Page<UserResponse> adminsOrDeans = userService.getUserByPage(page, size, sort, type, userRole);
+
+        return new ResponseEntity<>(adminsOrDeans, HttpStatus.OK);
     }
 
     @GetMapping("/getUserById/{userId}") // http://localhost:8080/user/getUserById/1 + GET

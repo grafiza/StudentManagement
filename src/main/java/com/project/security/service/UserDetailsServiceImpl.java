@@ -20,7 +20,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByUsernameEquals(username);
 
         if(user != null){
-            return new UserDetailsImpl(user.getId(),
+            return new UserDetailsImpl(
+                    user.getId(),
                     user.getUsername(),
                     user.getName(),
                     false,

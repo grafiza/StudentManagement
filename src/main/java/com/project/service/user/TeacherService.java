@@ -35,6 +35,7 @@ public class TeacherService {
 
     public ResponseMessage<TeacherResponse> saveTeacher(TeacherRequest teacherRequest) {
         //TODO : LessonProgram eklenecek
+        // unique kontrolü
         uniquePropertyValidator.checkDuplicate(teacherRequest.getUsername(),
                 teacherRequest.getSsn(),
                 teacherRequest.getPhoneNumber(),
@@ -108,5 +109,27 @@ public class TeacherService {
                 .object(userMapper.mapUserToUserResponse(teacher))
                 .status(HttpStatus.OK)
                 .build();
+    }
+
+    public ResponseMessage<UserResponse> deleteAdvisorTeacherById(Long teacherId) {
+        User teacher = methodHelper.isUserExist(teacherId);
+        methodHelper.checkRole(teacher, RoleType.TEACHER);
+        methodHelper.checkAdvisor(teacher);
+        teacher.setIsAdvisor(Boolean.FALSE);
+        userRepository.save(teacher);
+        List<User> list = userRepository.findByAdvisorTeacherId(teacher.getId());
+        if (!list.isEmpty()) {
+            list.forEach(student -> student.setAdvisorTeacherId(null));
+        }
+        //TODO meet
+        return ResponseMessage.<UserResponse>builder()
+                .message(SuccessMessages.ADVISOR_TEACHER_DELETE)
+                .object(userMapper.mapUserToUserResponse(teacher))
+                .status(HttpStatus.OK)
+                .build();
+    }
+
+    public List<UserResponse> getAllAdvisorTeacher() {
+        return userRepository.findAllByAdvisor(Boolean.TRUE).stream().map(userMapper::mapUserToUserResponse).collect(Collectors.toList());
     }
 }
