@@ -3,6 +3,7 @@ package com.project.service.user;
 import com.project.entity.concretes.business.LessonProgram;
 import com.project.entity.concretes.user.User;
 import com.project.entity.enums.RoleType;
+import com.project.exception.BadRequestException;
 import com.project.exception.ConflictException;
 import com.project.payload.mappers.UserMapper;
 import com.project.payload.messages.ErrorMessages;
@@ -162,6 +163,9 @@ public class TeacherService {
         // öğretmenin mevcut lesson programı
         Set<LessonProgram> teachersLessonProgram = teacher.getLessonProgramList();
         // TODO ÇAKIŞMA KONTORLÜ
+
+        validationLessonProgramTimes(lessonProgramSet,teachersLessonProgram);
+
         teachersLessonProgram.addAll(lessonProgramSet);
         teacher.setLessonProgramList(teachersLessonProgram);
         User updatedTeacher = userRepository.save(teacher);
@@ -170,5 +174,25 @@ public class TeacherService {
                 .status(HttpStatus.OK)
                 .object(userMapper.mapUserToTeacherResponse(updatedTeacher))
                 .build();
+    }
+
+    public void validationLessonProgramTimes(Set<LessonProgram> newLessonProgram, Set<LessonProgram> oldLessonProgram) {
+
+newLessonProgram.stream()
+        .anyMatch(lessonProgram ->
+
+        lessonProgram.getDay().equals(oldLessonProgram.getDay())) {
+            if (newLessonProgram.getStartTime().equals(oldLessonProgram.getStartTime())
+                    ||
+                    newLessonProgram.getStartTime().isBefore(oldLessonProgram.getStartTime()) && newLessonProgram.getStopTime().isAfter(oldLessonProgram.getStartTime())
+                    ||
+                    (newLessonProgram.getStartTime().isBefore(oldLessonProgram.getStopTime()) && newLessonProgram.getStopTime().isAfter(oldLessonProgram.getStopTime()))
+||
+                    (newLessonProgram.getStartTime().isAfter(oldLessonProgram.getStartTime()) && newLessonProgram.getStopTime().isBefore(oldLessonProgram.getStopTime()))
+            ) {
+                throw new BadRequestException("");
+            }
+        }
+
     }
 }
