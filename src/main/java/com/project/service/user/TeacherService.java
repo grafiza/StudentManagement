@@ -18,6 +18,7 @@ import com.project.repository.UserRepository;
 import com.project.service.UserRoleService;
 import com.project.service.business.LessonProgramService;
 import com.project.service.helper.MethodHelper;
+import com.project.service.validator.DateTimeValidator;
 import com.project.service.validator.UniquePropertyValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -40,9 +41,11 @@ public class TeacherService {
     private final PasswordEncoder passwordEncoder;
     private final MethodHelper methodHelper;
     private final LessonProgramService lessonProgramService;
+    private final DateTimeValidator dateTimeValidator;
 
     public ResponseMessage<TeacherResponse> saveTeacher(TeacherRequest teacherRequest) {
-        //TODO : LessonProgram eklenecek
+        Set<LessonProgram> lessonProgramSet =
+                lessonProgramService.getLessonProgramById(teacherRequest.getLessonIdList());
 
         //!!! unique kontrolu
         uniquePropertyValidator.checkDuplicate(teacherRequest.getUsername(), teacherRequest.getSsn(),
@@ -51,7 +54,7 @@ public class TeacherService {
         User teacher = userMapper.mapTeacherRequestToUser(teacherRequest);
         //!!! POJO da olmasi gerekipde DTO da olmayan verileri setliyoruz
         teacher.setUserRole(userRoleService.getUserRole(RoleType.TEACHER));
-        //TODO : Lessonrogram eklenecek
+        teacher.setLessonProgramList(lessonProgramSet);
         //!!! Password encode
         teacher.setPassword(passwordEncoder.encode(teacher.getPassword()));
         if (teacherRequest.getIsAdvisorTeacher()) {
@@ -65,31 +68,32 @@ public class TeacherService {
                 .status(HttpStatus.CREATED)
                 .object(userMapper.mapUserToTeacherResponse(savedTeacher))
                 .build();
+
     }
+        public ResponseMessage<TeacherResponse> updateTeacherForManagers(TeacherRequest teacherRequest, Long userId) {
+            //!!! id kontrol
+            User user = methodHelper.isUserExist(userId);
+            //!!! Parametrede gelen id, bir teacher a ait mi kontrolu
+            methodHelper.checkRole(user, RoleType.TEACHER);
+            Set<LessonProgram> lessonPrograms =
+                    lessonProgramService.getLessonProgramById(teacherRequest.getLessonIdList());
+            //!!! unique kontrolu
+            uniquePropertyValidator.checkUniqueProperties(user, teacherRequest);
+            //!!! DTO --> POJO
+            User updatedTeacher = userMapper.mapTeacherRequestToUpdatedUser(teacherRequest, userId);
+            //!!! Password encode
+            updatedTeacher.setPassword(passwordEncoder.encode(teacherRequest.getPassword()));
+            updatedTeacher.setLessonProgramList(lessonPrograms);
+            updatedTeacher.setUserRole(userRoleService.getUserRole(RoleType.TEACHER));
 
-    public ResponseMessage<TeacherResponse> updateTeacherForManagers(TeacherRequest teacherRequest, Long userId) {
-        //!!! id kontrol
-        User user = methodHelper.isUserExist(userId);
-        //!!! Parametrede gelen id, bir teacher a ait mi kontrolu
-        methodHelper.checkRole(user, RoleType.TEACHER);
-        //TODO : LessonProgram eklenecek
-        //!!! unique kontrolu
-        uniquePropertyValidator.checkUniqueProperties(user, teacherRequest);
-        //!!! DTO --> POJO
-        User updatedTeacher = userMapper.mapTeacherRequestToUpdatedUser(teacherRequest, userId);
-        //!!! Password encode
-        updatedTeacher.setPassword(passwordEncoder.encode(teacherRequest.getPassword()));
-        //TODO : LessonProgram
-        updatedTeacher.setUserRole(userRoleService.getUserRole(RoleType.TEACHER));
+            User savedTeacher = userRepository.save(updatedTeacher);
 
-        User savedTeacher = userRepository.save(updatedTeacher);
-
-        return ResponseMessage.<TeacherResponse>builder()
-                .object(userMapper.mapUserToTeacherResponse(savedTeacher))
-                .message(SuccessMessages.TEACHER_UPDATE)
-                .status(HttpStatus.OK)
-                .build();
-    }
+            return ResponseMessage.<TeacherResponse>builder()
+                    .object(userMapper.mapUserToTeacherResponse(savedTeacher))
+                    .message(SuccessMessages.TEACHER_UPDATE)
+                    .status(HttpStatus.OK)
+                    .build();
+        }
 
     public List<StudentResponse> getAllStudentByAdvisorUsername(String userName) {
         //!!! user kontrolu
@@ -162,9 +166,9 @@ public class TeacherService {
         Set<LessonProgram> lessonProgramSet = lessonProgramService.getLessonProgramById(lessonTeacherRequest.getLessonProgramId());
         // öğretmenin mevcut lesson programı
         Set<LessonProgram> teachersLessonProgram = teacher.getLessonProgramList();
-        // TODO ÇAKIŞMA KONTORLÜ
+        dateTimeValidator.checkLessonPrograms(teachersLessonProgram, lessonProgramSet);
 
-        validationLessonProgramTimes(lessonProgramSet,teachersLessonProgram);
+        // validationLessonProgramTimes(lessonProgramSet, teachersLessonProgram);
 
         teachersLessonProgram.addAll(lessonProgramSet);
         teacher.setLessonProgramList(teachersLessonProgram);
@@ -176,23 +180,23 @@ public class TeacherService {
                 .build();
     }
 
-    public void validationLessonProgramTimes(Set<LessonProgram> newLessonProgram, Set<LessonProgram> oldLessonProgram) {
-
-newLessonProgram.stream()
-        .anyMatch(lessonProgram ->
-
-        lessonProgram.getDay().equals(oldLessonProgram.getDay())) {
-            if (newLessonProgram.getStartTime().equals(oldLessonProgram.getStartTime())
-                    ||
-                    newLessonProgram.getStartTime().isBefore(oldLessonProgram.getStartTime()) && newLessonProgram.getStopTime().isAfter(oldLessonProgram.getStartTime())
-                    ||
-                    (newLessonProgram.getStartTime().isBefore(oldLessonProgram.getStopTime()) && newLessonProgram.getStopTime().isAfter(oldLessonProgram.getStopTime()))
-||
-                    (newLessonProgram.getStartTime().isAfter(oldLessonProgram.getStartTime()) && newLessonProgram.getStopTime().isBefore(oldLessonProgram.getStopTime()))
-            ) {
-                throw new BadRequestException("");
-            }
-        }
-
-    }
+    //public void validationLessonProgramTimes(Set<LessonProgram> newLessonProgram, Set<LessonProgram> oldLessonProgram) {
+//
+    //    newLessonProgram.stream()
+    //            .anyMatch(lessonProgram ->
+//
+    //                    lessonProgram.getDay().equals(oldLessonProgram.getDay())) {
+    //        if (newLessonProgram.getStartTime().equals(oldLessonProgram.getStartTime())
+    //                ||
+    //                newLessonProgram.getStartTime().isBefore(oldLessonProgram.getStartTime()) && newLessonProgram.getStopTime().isAfter(oldLessonProgram.getStartTime())
+    //                ||
+    //                (newLessonProgram.getStartTime().isBefore(oldLessonProgram.getStopTime()) && newLessonProgram.getStopTime().isAfter(oldLessonProgram.getStopTime()))
+    //                ||
+    //                (newLessonProgram.getStartTime().isAfter(oldLessonProgram.getStartTime()) && newLessonProgram.getStopTime().isBefore(oldLessonProgram.getStopTime()))
+    //        ) {
+    //            throw new BadRequestException("");
+    //        }
+    //    }
+//
+    //}
 }
