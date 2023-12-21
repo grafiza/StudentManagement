@@ -12,34 +12,44 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import javax.validation.constraints.Pattern;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/students")
+@RequiredArgsConstructor
 public class StudentController {
-    private final StudentService studentService;
+
+    private final StudentService studentService ;
 
     @PostMapping("/save") // http://localhost:8080/students/save + POST + JSON
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity<ResponseMessage<StudentResponse>> saveStudent(@RequestBody @Valid StudentRequest studentRequest) {
+    public ResponseEntity<ResponseMessage<StudentResponse>> saveStudent(
+            @RequestBody @Valid StudentRequest studentRequest){
         return ResponseEntity.ok(studentService.saveStudent(studentRequest));
     }
 
+    //!!! ogrencinin kendisini update etme islemi
     @PatchMapping("/update") // http://localhost:8080/students/update + PATCH + JSON
-    @PreAuthorize("hasAnyAuthority('STUDENT')") // şifre hariç diğer değişkenleri setleme
-    public ResponseEntity<String> updateStudent(@RequestBody @Valid StudentRequestWithoutPassword studentRequestWithoutPassword,
+    @PreAuthorize("hasAnyAuthority('STUDENT')")
+    public ResponseEntity<String> updateStudent(@RequestBody @Valid
+                                                StudentRequestWithoutPassword studentRequestWithoutPassword,
                                                 HttpServletRequest request){
-            return studentService.updateStudent(studentRequestWithoutPassword,request);
+        return studentService.updateStudent(studentRequestWithoutPassword, request);
     }
 
-    @PutMapping("/update/{id}")  // http://localhost:8080/students/update/1
+    @PutMapping("/update/{userId}")// http://localhost:8080/students/update/1 + PUT + JSON
     @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER')")
-    public ResponseMessage<StudentResponse> updateStudentForManager(@PathVariable Long userId, // öğrenci şifresini unutup idare ben şifremi unuttum derse
-                                                                    @RequestBody @Valid StudentRequest studentRequest){
+    public ResponseMessage<StudentResponse> updateStudentForManagers(@PathVariable Long userId,
+                                                                     @RequestBody @Valid StudentRequest studentRequest ){
+        return studentService.updateStudentForManagers(userId,studentRequest);
+    }
 
+    //TODO: LessonProgram Ekleme
+
+    @GetMapping("/changeStatus") // http://localhost:8080/students/changeStatus?id=1&status=true + GET
+    @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER')")
+    public ResponseMessage changeStatusOfStudent(@RequestParam Long id, @RequestParam boolean status){
+        return studentService.changeStatusOfStudent(id,status);
     }
 
 
 }
-

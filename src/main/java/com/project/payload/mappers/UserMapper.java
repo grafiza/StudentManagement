@@ -13,7 +13,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserMapper {
-    public UserResponse mapUserToUserResponse(User user) {
+
+    // !!! POJO --> DTO
+    public UserResponse mapUserToUserResponse(User user){
         return UserResponse.builder()
                 .userId(user.getId())
                 .username(user.getUsername())
@@ -25,13 +27,13 @@ public class UserMapper {
                 .birthPlace(user.getBirthPlace())
                 .ssn(user.getSsn())
                 .email(user.getEmail())
-                .userRole(user.getUserRole().getRoleType().name)
+                .userRole(user.getUserRole().getRoleType().name())
                 .build();
-
     }
 
-    public User mapUserRequestToUser(BaseUserRequest userRequest) {
-        // burada polymorphism kullandık
+    //!!! DTO --> POJO
+    public User mapUserRequestToUser(BaseUserRequest userRequest){
+
         return User.builder()
                 .username(userRequest.getUsername())
                 .name(userRequest.getName())
@@ -48,6 +50,7 @@ public class UserMapper {
     }
 
     public StudentResponse mapUserToStudentResponse(User student) {
+
         return StudentResponse.builder()
                 .userId(student.getId())
                 .username(student.getUsername())
@@ -63,9 +66,11 @@ public class UserMapper {
                 .studentNumber(student.getStudentNumber())
                 .isActive(student.isActive())
                 .build();
+
     }
 
     public TeacherResponse mapUserToTeacherResponse(User teacher) {
+
         return TeacherResponse.builder()
                 .userId(teacher.getId())
                 .username(teacher.getUsername())
@@ -80,15 +85,11 @@ public class UserMapper {
                 .lessonPrograms(teacher.getLessonProgramList())
                 .isAdvisorTeacher(teacher.getIsAdvisor())
                 .build();
-
-
     }
 
-
-    public User mapUserRequestToUpdatedUser(BaseUserRequest userRequest, Long userId) {
-        // burada polymorphism kullandık
+    public User mapUserRequestToUpdatedUser(UserRequest userRequest, Long userId) {
         return User.builder()
-                .id(userId)
+                .id((userId))
                 .username(userRequest.getUsername())
                 .name(userRequest.getName())
                 .surname(userRequest.getSurname())
@@ -102,27 +103,26 @@ public class UserMapper {
                 .build();
     }
 
-    // TeacherRequest to user
-
-    public User mapTeacherRequestToUser(TeacherRequest teacherRequest) {
+    //!!! TeacherRequest --> User
+    public User mapTeacherRequestToUser(TeacherRequest teacherRequest){
         return User.builder()
-                .username(teacherRequest.getUsername())
-                .password(teacherRequest.getPassword())
                 .name(teacherRequest.getName())
                 .surname(teacherRequest.getSurname())
+                .ssn(teacherRequest.getSsn())
+                .username(teacherRequest.getUsername())
                 .birthDay(teacherRequest.getBirthDay())
                 .birthPlace(teacherRequest.getBirthPlace())
-                .ssn(teacherRequest.getSsn())
+                .password(teacherRequest.getPassword())
                 .phoneNumber(teacherRequest.getPhoneNumber())
-                .gender(teacherRequest.getGender())
                 .email(teacherRequest.getEmail())
-                .built_in(teacherRequest.getBuiltIn())
                 .isAdvisor(teacherRequest.getIsAdvisorTeacher())
+                .built_in(teacherRequest.getBuiltIn())
+                .gender(teacherRequest.getGender())
                 .build();
     }
 
     //!!! TeacherRequest --> UpdatedUser
-    public User mapTeacherRequestToUpdatedUser(TeacherRequest userRequest, Long userId) {
+    public User mapTeacherRequestToUpdatedUser(TeacherRequest userRequest, Long userId){
         return User.builder()
                 .id(userId)
                 .username(userRequest.getUsername())
@@ -140,7 +140,8 @@ public class UserMapper {
 
     }
 
-    public User mapStudentRequestToUser(StudentRequest studentRequest) {
+    //!!! StudentRequest --> User
+    public User mapStudentRequestToUser(StudentRequest studentRequest){
         return User.builder()
                 .fatherName(studentRequest.getFatherName())
                 .motherName(studentRequest.getMotherName())
@@ -156,5 +157,12 @@ public class UserMapper {
                 .gender(studentRequest.getGender())
                 .built_in(studentRequest.getBuiltIn())
                 .build();
+
+    }
+
+    public User mapStudentRequestToUpdatedUser(StudentRequest studentRequest, Long userId) {
+        User student = mapStudentRequestToUser(studentRequest);
+        student.setId(userId);
+        return student;
     }
 }

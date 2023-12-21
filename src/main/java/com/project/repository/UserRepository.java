@@ -17,6 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByUsernameEquals(String username);
 
+    //!!! alttaki ve ustteki ayni isi yapiyor
     User findByUsername(String username);
 
     boolean existsByUsername(String username);
@@ -27,22 +28,22 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmail(String email);
 
-
-    @Query("SELECT u FROM User u WHERE u.userRole.roleName = :roleName")
-        // JPQL
+    @Query("SELECT u FROM User u WHERE u.userRole.roleName = :roleName") // JPQL
     Page<User> findByUserByRole(String roleName, Pageable pageable);
 
     List<User> getUserByNameContaining(String name);
 
-    @Query(value = "SELECT COUNT(u) FROM User u WHERE u.userRole.roleType=?1")
+    @Query(value = "SELECT COUNT(u) FROM User u WHERE u.userRole.roleType = ?1")
     long countAdmin(RoleType roleType);
 
     List<User> findByAdvisorTeacherId(Long id);
 
-    @Query(value = "SELECT u FROM User u WHERE u.isAdvisor=?1")
+    @Query("SELECT u FROM User u WHERE u.isAdvisor =?1")
     List<User> findAllByAdvisor(Boolean aTrue);
-    @Query(value = "SELECT (count(u)>0)  FROM User u WHERE u.userRole.roleType=?1")
+
+    @Query(value = "SELECT (count (u)>0) FROM User u WHERE u.userRole.roleType = ?1")
     boolean findStudent(RoleType roleType);
-    @Query(value = "SELECT max(u.studentNumber)  FROM User u")
+
+    @Query(value = "SELECT MAX (u.studentNumber) FROM User u")
     int getMaxStudentNumber();
 }
