@@ -5,7 +5,7 @@ public enum RoleType {
     TEACHER("Teacher"),
     STUDENT("Student"),
     MANAGER("Dean"),
-    ASSISTANT_MANGER("ViceDean");
+    ASSISTANT_MANAGER("ViceDean");
 
     public final String name;
 

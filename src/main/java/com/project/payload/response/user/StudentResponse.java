@@ -16,7 +16,8 @@ import java.util.Set;
 @SuperBuilder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StudentResponse extends BaseUserResponse {
-    private Set<LessonProgram> lessonPrograms;
+
+    private Set<LessonProgram> lessonProgramSet;
     private int studentNumber;
     private String motherName;
     private String fatherName;

@@ -28,11 +28,11 @@ public class EducationTermService {
     private final EducationTermMapper educationTermMapper;
     private final PageableHelper pageableHelper;
 
-
     public ResponseMessage<EducationTermResponse> saveEducationTerm(EducationTermRequest educationTermRequest) {
         validateEducationTermDates(educationTermRequest);
-        EducationTerm savedEducationTerm = educationTermRepository.save(
-                educationTermMapper.mapEducationTermRequestToEducationTerm(educationTermRequest));
+        EducationTerm savedEducationTerm =
+                educationTermRepository.save(educationTermMapper.mapEducationTermRequestToEducationTerm(educationTermRequest));
+
         return ResponseMessage.<EducationTermResponse>builder()
                 .message(SuccessMessages.EDUCATION_TERM_SAVE)
                 .object(educationTermMapper.mapEducationTermToEducationTermResponse(savedEducationTerm))
@@ -42,33 +42,32 @@ public class EducationTermService {
     }
 
     //!!! Yrd Methd -1
-    private void validateEducationTermDatesForRequest(EducationTermRequest educationTermRequest) {
+    private void validateEducationTermDatesForRequest(EducationTermRequest educationTermRequest){
         // registration > start
-        if (educationTermRequest.getLastRegistrationDate().isAfter(educationTermRequest.getStartDate())) {
+        if(educationTermRequest.getLastRegistrationDate().isAfter(educationTermRequest.getStartDate())){
             throw new ResourceNotFoundException(ErrorMessages.EDUCATION_START_DATE_IS_EARLIER_THAN_LAST_REGISTRATION_DATE);
         }
 
         // end > start
-        if (educationTermRequest.getEndDate().isBefore(educationTermRequest.getStartDate())) {
+        if(educationTermRequest.getEndDate().isBefore(educationTermRequest.getStartDate())) {
             throw new ResourceNotFoundException(ErrorMessages.EDUCATION_END_DATE_IS_EARLIER_THAN_START_DATE);
         }
     }
-
     //!!! Yrd Method-2
-    private void validateEducationTermDates(EducationTermRequest educationTermRequest) {
+    private void validateEducationTermDates(EducationTermRequest educationTermRequest){
 
         validateEducationTermDatesForRequest(educationTermRequest);
 
         //!!! Bir yil icinde bir tane Guz donemi olmali
-        if (educationTermRepository.existsByTermAndYear(educationTermRequest.getTerm(),
-                educationTermRequest.getStartDate().getYear())) {
+        if(educationTermRepository.existsByTermAndYear(educationTermRequest.getTerm(),
+                educationTermRequest.getStartDate().getYear())){
             throw new ResourceNotFoundException(ErrorMessages.EDUCATION_TERM_IS_ALREADY_EXIST_BY_TERM_AND_YEAR_MESSAGE);
         }
 
         //!!! yil icinde eklenecek educationTerm, DB'deki mevcuttakilerin tarihleri ile cakismamali
-        if (educationTermRepository.findByYear(educationTermRequest.getStartDate().getYear())
+        if(educationTermRepository.findByYear(educationTermRequest.getStartDate().getYear())
                 .stream()
-                .anyMatch(educationTerm ->
+                .anyMatch(educationTerm->
                         (
                                 educationTerm.getStartDate().equals(educationTermRequest.getStartDate()) // ilk kontrol baslama tarihlerinin ayni olma durumu
                                         || (educationTerm.getStartDate().isBefore(educationTermRequest.getStartDate())//2.kontrol: eklenecek olan ET un startDatei mevcuttakilerin arasina denk geliyor mu
@@ -79,7 +78,7 @@ public class EducationTermService {
                                         && educationTerm.getEndDate().isBefore(educationTermRequest.getEndDate()))
 
                         ))
-        ) {
+        ){
             throw new BadRequestException(ErrorMessages.EDUCATION_TERM_CONFLICT_MESSAGE);
         }
 
@@ -90,12 +89,13 @@ public class EducationTermService {
         return educationTermMapper.mapEducationTermToEducationTermResponse(term);
     }
 
-    private EducationTerm isEducationTermExist(Long id) {
-        return educationTermRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException(String.format(ErrorMessages.EDUCATION_TERM_NOT_FOUND_MESSAGE, id)));
+    private EducationTerm isEducationTermExist(Long id){
+        return educationTermRepository.findById(id).orElseThrow(()->
+                new ResourceNotFoundException(String.format(ErrorMessages.EDUCATION_TERM_NOT_FOUND_MESSAGE,id)));
     }
 
     public List<EducationTermResponse> getAllEducationTerms() {
+
         return educationTermRepository.findAll()
                 .stream()
                 .map(educationTermMapper::mapEducationTermToEducationTermResponse)
@@ -119,12 +119,13 @@ public class EducationTermService {
     }
 
     public ResponseMessage<EducationTermResponse> updateEducationTerm(Long id, EducationTermRequest educationTermRequest) {
+
         isEducationTermExist(id);
         validateEducationTermDates(educationTermRequest);
+        EducationTerm educationTerm2 =
+                educationTermMapper.mapEducationTermRequestToUpdatedEducationTerm(id,educationTermRequest);
 
-        EducationTerm educationTermUpdated =
-                educationTermRepository.save(
-                        educationTermMapper.mapEducationTermRequestToUpdatedEducationTerm(id,educationTermRequest));
+        EducationTerm educationTermUpdated = educationTermRepository.save(educationTerm2);
 
         return ResponseMessage.<EducationTermResponse>builder()
                 .message(SuccessMessages.EDUCATION_TERM_UPDATE)
@@ -133,20 +134,8 @@ public class EducationTermService {
                 .build();
     }
 
-
-    // lesson program için yazıldı
-    public EducationTerm  findEducationTermById(Long id){
+    //!!! LessonProgram icin yazildi
+    public EducationTerm findEducationTermById(Long id){
         return isEducationTermExist(id);
     }
-
 }
-
-
-
-
-
-
-
-
-
-

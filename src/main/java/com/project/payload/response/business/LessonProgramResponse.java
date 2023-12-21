@@ -7,9 +7,9 @@ import com.project.entity.enums.Day;
 import com.project.payload.response.user.StudentResponse;
 import com.project.payload.response.user.TeacherResponse;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 import java.time.LocalTime;
 import java.util.Set;
@@ -17,9 +17,10 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@RequiredArgsConstructor
+@Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LessonProgramResponse {
+
     private Long lessonProgramId;
     private Day day;
     private LocalTime startTime;

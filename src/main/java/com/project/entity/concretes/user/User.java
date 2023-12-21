@@ -52,7 +52,7 @@ public class User {
     @Column(unique = true)
     private String email;
 
-    private Boolean built_in; // Değiştirilemez !!!
+    private Boolean built_in; // Degistirilemez degistirilmesi dahi teklif edilemez
 
     private String motherName;
 
@@ -62,7 +62,7 @@ public class User {
 
     private boolean isActive;
 
-    private Boolean isAdvisor;
+    private Boolean isAdvisor;// True
 
     private Long advisorTeacherId; //  ogrenciler icin gerekli
 

@@ -1,4 +1,40 @@
 package com.project.payload.mappers;
 
-public class LessonProgramMappers {
+import com.project.entity.concretes.business.EducationTerm;
+import com.project.entity.concretes.business.Lesson;
+import com.project.entity.concretes.business.LessonProgram;
+import com.project.payload.request.business.LessonProgramRequest;
+import com.project.payload.response.business.LessonProgramResponse;
+import lombok.Data;
+import org.springframework.stereotype.Component;
+
+import java.util.Set;
+
+@Data
+@Component
+public class LessonProgramMapper {
+    // DTO --> POJO
+
+    public LessonProgram mapLessonProgramRequestToLessonProgram(LessonProgramRequest lessonProgramRequest,
+                                                                Set<Lesson> lessons,
+                                                                EducationTerm educationTerms) {
+        return LessonProgram.builder()
+                .startTime(lessonProgramRequest.getStartTime())
+                .stopTime(lessonProgramRequest.getStopTime())
+                .day(lessonProgramRequest.getDay())
+                .lessons(lessons)
+                .educationTerm(educationTerms)
+                .build();
+    }
+    public LessonProgramResponse mapLessonProgramToLessonProgramResponse(LessonProgram lessonProgram){
+        return LessonProgramResponse.builder()
+                .lessonProgramId(lessonProgram.getId())
+                .day(lessonProgram.getDay())
+                .startTime(lessonProgram.getStartTime())
+                .stopTime(lessonProgram.getStopTime())
+                .lessonName(lessonProgram.getLessons())
+                //.educationTerm(lessonProgram.getEducationTerm())
+                .build();
+
+    }
 }

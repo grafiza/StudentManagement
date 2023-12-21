@@ -2,7 +2,6 @@ package com.project.payload.response.user;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.project.entity.concretes.business.LessonProgram;
-import com.project.payload.request.abstracts.BaseUserRequest;
 import com.project.payload.response.abstracts.BaseUserResponse;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +16,7 @@ import java.util.Set;
 @SuperBuilder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TeacherResponse extends BaseUserResponse {
+
     private Set<LessonProgram> lessonPrograms;
-    private  Boolean isAdvisorTeacher;
+    private Boolean isAdvisorTeacher;
 }

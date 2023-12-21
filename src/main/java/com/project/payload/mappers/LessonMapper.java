@@ -3,14 +3,14 @@ package com.project.payload.mappers;
 import com.project.entity.concretes.business.Lesson;
 import com.project.payload.request.business.LessonRequest;
 import com.project.payload.response.business.LessonResponse;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
 @Data
 @Component
 public class LessonMapper {
-    // DTO -->POJO
+
+    //!!! DTO --> POJO
     public Lesson mapLessonRequestToLesson(LessonRequest lessonRequest){
         return Lesson.builder()
                 .lessonName(lessonRequest.getLessonName())
@@ -18,7 +18,9 @@ public class LessonMapper {
                 .isCompulsory(lessonRequest.getIsCompulsory())
                 .build();
     }
-    public LessonResponse mapLessonToLessonResponse (Lesson lesson){
+
+    //!!! POJO --> DTO
+    public LessonResponse mapLessonToLessonResponse(Lesson lesson){
         return LessonResponse.builder()
                 .lessonId(lesson.getLessonId())
                 .lessonName(lesson.getLessonName())
@@ -27,7 +29,7 @@ public class LessonMapper {
                 .build();
     }
 
-    public Lesson mapLessonRequestToUpdatedLesson(Long lessonId,LessonRequest lessonRequest){
+    public Lesson mapLessonRequestToUpdatedLesson(Long lessonId, LessonRequest lessonRequest){
         return Lesson.builder()
                 .lessonId(lessonId)
                 .lessonName(lessonRequest.getLessonName())

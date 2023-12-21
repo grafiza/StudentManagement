@@ -11,9 +11,10 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-@JsonInclude(JsonInclude.Include.NON_NULL) // null değerleri döndürmez
-public class ResponseMessage <T>{
-    private T object;
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ResponseMessage<E> {
+
+    private E object;
     private String message;
     private HttpStatus status;
 }

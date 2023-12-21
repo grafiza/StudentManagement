@@ -1,6 +1,5 @@
 package com.project.controller;
 
-import com.project.entity.concretes.user.User;
 import com.project.payload.request.user.UserRequest;
 import com.project.payload.request.user.UserRequestWithoutPassword;
 import com.project.payload.response.ResponseMessage;
@@ -22,17 +21,17 @@ import java.util.List;
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
 
-        @PostMapping("/save/{userRole}") // http://localhost:8080/user/save/Admin + POST + JSON
+    @PostMapping("/save/{userRole}") // http://localhost:8080/user/save/Admin + POST + JSON    --> Dean / ViceDean
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<ResponseMessage<UserResponse>> saveUser(@RequestBody @Valid UserRequest userRequest,
                                                                   @PathVariable String userRole) {
         return ResponseEntity.ok(userService.saveUser(userRequest, userRole));
-
     }
 
-    @GetMapping("/getAllUserByPage/{userRole}") // http://localhost:8080/user/getAllUserByPage/Admin
+    @GetMapping("/getAllUserByPage/{userRole}") // http://localhost:8080/user/getAllUserByPage/Admin  + GET
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<Page<UserResponse>> getUserByPage(
             @PathVariable String userRole,
@@ -46,27 +45,27 @@ public class UserController {
         return new ResponseEntity<>(adminsOrDeans, HttpStatus.OK);
     }
 
-    @GetMapping("/getUserById/{userId}") // http://localhost:8080/user/getUserById/1 + GET
+    @GetMapping("/getUserById/{userId}")  // http://localhost:8080/user/getUserById/1  + GET
     @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER')")
     public ResponseMessage<BaseUserResponse> getUserById(@PathVariable Long userId) {
         return userService.getUserById(userId);
     }
 
-    @DeleteMapping("/delete/{id}")   // http://localhost:8080/user/delete/1 + DELETE
+    @DeleteMapping("/delete/{id}")  // http://localhost:8080/user/delete/3  + DELETE
     @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER')")
-    public ResponseEntity<String> deleteUserById(@PathVariable Long id, HttpServletRequest request) {
-        return ResponseEntity.ok(userService.deleteUserById(id, request));
+    public ResponseEntity<String> deleteUserById(@PathVariable Long id, HttpServletRequest httpServletRequest) {
+
+        return ResponseEntity.ok(userService.deleteUserById(id, httpServletRequest));
     }
 
-    @PutMapping("/update/{userId}") // http://localhost:8080/user/update/1 + PUT + JSON
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PutMapping("/update/{userId}") // http://localhost:8080/user/update/3 + PUT  + JSON
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseMessage<BaseUserResponse> updateAdminDeanViceDeanForAdmin(@RequestBody @Valid UserRequest userRequest,
                                                                              @PathVariable Long userId) {
         return userService.updateUser(userRequest, userId);
     }
 
-    // password bilgisi kullanılmasın
-    @PatchMapping("/updateUser") // http://localhost:8080/user/updateUser/2 + PATCH
+    @PatchMapping("/updateUser") // http://localhost:8080/user/updateUser + PATCH + JSON
     @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER','TEACHER')")
     public ResponseEntity<String> updateUserForUsers(@RequestBody @Valid
                                                      UserRequestWithoutPassword userRequestWithoutPassword,
@@ -74,9 +73,10 @@ public class UserController {
         return userService.updateUserForUsers(userRequestWithoutPassword, request);
     }
 
-        @GetMapping("/getUserByName") // http://localhost:8080/user/getUserByName/ + GET
+    @GetMapping("/getUserByName") // http://localhost:8080/user/getUserByName?name=user1 + GET
     @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER')")
-    public List<UserResponse> getUserByName(@RequestParam(name ="name") String name){
-        return userService.getUserByName(name);
+    public List<UserResponse> getUserByName(@RequestParam (name = "name") String userName) {
+        return userService.getUserByName(userName);
     }
+
 }

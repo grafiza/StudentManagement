@@ -10,9 +10,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class EducationTermMapper {
 
-
-    // DTO -> POJO
-    public EducationTerm mapEducationTermRequestToEducationTerm (EducationTermRequest educationTermRequest){
+    //!!! DTO --> POJO
+    public EducationTerm mapEducationTermRequestToEducationTerm(EducationTermRequest educationTermRequest){
         return EducationTerm.builder()
                 .term(educationTermRequest.getTerm())
                 .startDate(educationTermRequest.getStartDate())
@@ -21,6 +20,7 @@ public class EducationTermMapper {
                 .build();
     }
 
+    //!!! POJO --> DTO
     public EducationTermResponse mapEducationTermToEducationTermResponse(EducationTerm educationTerm) {
         return EducationTermResponse.builder()
                 .id(educationTerm.getId())
@@ -37,5 +37,4 @@ public class EducationTermMapper {
                 .id(id)
                 .build();
     }
-
 }

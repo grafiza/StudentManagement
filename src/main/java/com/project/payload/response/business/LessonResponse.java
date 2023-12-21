@@ -10,8 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 public class LessonResponse {
+
     private Long lessonId;
     private String lessonName;
     private int creditScore;
     private boolean isCompulsory;
+
+
 }

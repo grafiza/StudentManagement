@@ -15,57 +15,51 @@ import javax.validation.Valid;
 import java.util.Set;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/lessons")
+@RequiredArgsConstructor
 public class LessonController {
+
     private final LessonService lessonService;
 
-    @PostMapping("/save")   // http://localhost:8080/lessons/save   + POST + JSON
+    @PostMapping("/save") // http://localhost:8080/lessons/save + POST + JSON
     @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER')")
-    public ResponseMessage<LessonResponse> saveLesson(@RequestBody @Valid LessonRequest lessonRequest) {
+    public ResponseMessage<LessonResponse> saveLesson(@RequestBody @Valid LessonRequest lessonRequest){
         return lessonService.saveLesson(lessonRequest);
     }
 
     @DeleteMapping("/delete/{id}")// http://localhost:8080/lessons/delete/2 + DELETE
     @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER')")
-    public ResponseMessage deleteLesson(@PathVariable Long id) {
+    public ResponseMessage deleteLesson(@PathVariable Long id){
         return lessonService.deleteLessonById(id);
     }
 
-    @GetMapping("getLessonByName")   // http://localhost:8080/lessons/getLessonByName?lessonName=Java + GET
+    @GetMapping("/getLessonByName") // http://localhost:8080/lessons/getLessonByName?lessonName=Java + GET
     @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER')")
-    public ResponseMessage<LessonResponse> getLessonByLessonName(@RequestParam String lessonName) {
+    public ResponseMessage<LessonResponse> getLessonByLessonName(@RequestParam String lessonName){
         return lessonService.getLessonByLessonName(lessonName);
     }
 
-    @GetMapping("/findLessonByPage")
-    // http://localhost:8080/lessons/findLessonByPage?page=0&size=10&sort=lessonName&type=desc + GET
+    @GetMapping("/findLessonByPage")  // http://localhost:8080/lessons/findLessonByPage?page=0&size=10&sort=lessonName&type=desc + GET
     @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER')")
     public Page<LessonResponse> findLessonByPage(
             @RequestParam(value = "page") int page,
             @RequestParam(value = "size") int size,
             @RequestParam(value = "sort") String sort,
-            @RequestParam(value = "type") String type) {
-        return lessonService.findLessonByPage(page, size, sort, type);
+            @RequestParam(value = "type") String type)
+    {
+        return lessonService.findLessonByPage(page,size,sort,type);
     }
 
-
-    @GetMapping("/getAllLessonByLessonId") // http://localhost:8080/lessons/getAllLessonByLessonId?lessonId=1,2,3 + GET
+    @GetMapping("/getAllLessonByLessonId")// http://localhost:8080/lessons/getAllLessonByLessonId?lessonId=1,2,3 + GET
     @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER')")
-    public Set<Lesson> getAllLessonByLessonId(@RequestParam(name = "lessonId") Set<Long> idSet) {
+    public Set<Lesson> getAllLessonByLessonId(@RequestParam(name = "lessonId") Set<Long> idSet){
         return lessonService.getAllLessonByLessonId(idSet);
     }
 
-    @PutMapping("/update/{lessonId}")   // http://localhost:8080/lessons/update/1  +  PUT + JSON
+    @PutMapping("/update/{lessonId}")// http://localhost:8080/lessons/update/2  + PUT + JSON
     @PreAuthorize("hasAnyAuthority('ADMIN','MANAGER','ASSISTANT_MANAGER')")
     public ResponseEntity<LessonResponse> updateLessonById(@PathVariable Long lessonId,
                                                            @RequestBody LessonRequest lessonRequest){
-        return ResponseEntity.ok(lessonService.updateLessonById(lessonId,lessonRequest));
-
+        return ResponseEntity.ok(lessonService.updateLessonById(lessonId, lessonRequest));
     }
-
-
-
-
-
 }

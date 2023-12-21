@@ -16,11 +16,13 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Builder
 public class UserRole {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private RoleType roleType;
 
     private String roleName;

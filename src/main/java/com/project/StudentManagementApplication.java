@@ -8,7 +8,6 @@ import com.project.repository.UserRepository;
 import com.project.repository.UserRoleRepository;
 import com.project.service.UserRoleService;
 import com.project.service.UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,11 +15,19 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.time.LocalDate;
 
 @SpringBootApplication
-@RequiredArgsConstructor
 public class StudentManagementApplication implements CommandLineRunner {
+
     private final UserRoleService userRoleService;
-    private final UserRoleRepository userRoleRepository;
     private final UserService userService;
+    private final UserRoleRepository userRoleRepository;
+
+    public StudentManagementApplication(UserRoleService userRoleService,
+                                        UserService userService,
+                                        UserRoleRepository userRoleRepository) {
+        this.userRoleService = userRoleService;
+        this.userService = userService;
+        this.userRoleRepository = userRoleRepository;
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(StudentManagementApplication.class, args);
@@ -28,11 +35,12 @@ public class StudentManagementApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // role tablosu dolduruluyor
-        if (userRoleService.getAllUserRole().isEmpty()) {
+        //!!! Role tablomu bos ise dolduracagiz
+        if (userRoleService.getAllUserRoles().isEmpty()) {
             UserRole admin = new UserRole();
+
             admin.setRoleType(RoleType.ADMIN);
-            admin.setRoleName("SuperAdmin");
+            admin.setRoleName("Admin");
             userRoleRepository.save(admin);
 
             UserRole dean = new UserRole();
@@ -41,8 +49,8 @@ public class StudentManagementApplication implements CommandLineRunner {
             userRoleRepository.save(dean);
 
             UserRole viceDean = new UserRole();
-            viceDean.setRoleType(RoleType.ASSISTANT_MANGER);
-            viceDean.setRoleName("Vice Dean");
+            viceDean.setRoleType(RoleType.ASSISTANT_MANAGER);
+            viceDean.setRoleName("ViceDean");
             userRoleRepository.save(viceDean);
 
             UserRole teacher = new UserRole();
@@ -54,22 +62,26 @@ public class StudentManagementApplication implements CommandLineRunner {
             student.setRoleType(RoleType.STUDENT);
             student.setRoleName("Student");
             userRoleRepository.save(student);
+
         }
 
-        // admin yoksa bir tane built in admin oluşturuluyor
+        //!!! Admin yoksa BuiltIn Admin olusturuluyor
         if (userService.countAllAdmins() == 0) {
-            UserRequest adminRequest= new UserRequest();
-            adminRequest.setUsername("SuperAdmin");
+            UserRequest adminRequest = new UserRequest();
+            adminRequest.setUsername("SuperAdmin"); // builtIN degeri TRUE olarak setlenmis olacak
             adminRequest.setEmail("admin@admin.com");
             adminRequest.setSsn("111-11-1111");
             adminRequest.setPassword("12345678");
             adminRequest.setName("Zafer");
             adminRequest.setSurname("Kanbur");
-            adminRequest.setPhoneNumber("555-555-5555");
+            adminRequest.setPhoneNumber("111-111-1111");
             adminRequest.setGender(Gender.MALE);
-            adminRequest.setBirthDay(LocalDate.of(1980,12,9));
-            adminRequest.setBirthPlace("Rize");
-            userService.saveUser(adminRequest,"Admin");
+            adminRequest.setBirthDay(LocalDate.of(1980, 2, 2));
+            adminRequest.setBirthPlace("ISTANBUL");
+
+            userService.saveUser(adminRequest, "Admin");
+
         }
     }
+
 }

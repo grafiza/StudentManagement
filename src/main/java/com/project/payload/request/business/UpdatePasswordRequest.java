@@ -12,6 +12,7 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdatePasswordRequest {
+
     @NotBlank(message = "Please provide old password")
     private String oldPassword;
 
