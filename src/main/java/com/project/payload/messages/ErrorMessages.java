@@ -44,4 +44,6 @@ public class ErrorMessages {
 
     public static final String LESSON_PROGRAM_ALREADY_EXIST = "Error: Course schedule can not be selected for the same hour and date";
 
+    public static final String STUDENT_INFO_NOT_FOUND = "Error: Student Info with id : %d not found";
+
 }

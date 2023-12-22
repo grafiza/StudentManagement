@@ -189,4 +189,8 @@ public class UserService {
     public long countAllAdmins() {
         return userRepository.countAdmin(RoleType.ADMIN); //JPQL
     }
+
+    public User getTeacherByUsername(String teacherUsername) {
+
+    }
 }

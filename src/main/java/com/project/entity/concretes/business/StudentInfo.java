@@ -3,6 +3,7 @@ package com.project.entity.concretes.business;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.entity.concretes.user.User;
 import com.project.entity.enums.Note;
+import com.project.payload.response.business.StudentInfoResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -48,5 +49,6 @@ public class StudentInfo {
 
     @OneToOne
     private EducationTerm educationTerm;
+
 
 }
