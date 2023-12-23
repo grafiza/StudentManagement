@@ -25,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -190,7 +191,13 @@ public class UserService {
         return userRepository.countAdmin(RoleType.ADMIN); //JPQL
     }
 
-    public User getTeacherByUsername(String teacherUsername) {
-
+    public User getUserByUserId(Long userId) {
+        return userRepository.findById(userId).orElseThrow(()->
+                new ResourceNotFoundException(String.format(ErrorMessages.NOT_FOUND_USER_MESSAGE,userId)));
     }
+
+    public List<User> getStudentById (Long[] studentIds){
+        return userRepository.findByIdsEquals(studentIds);
+    }
+
 }

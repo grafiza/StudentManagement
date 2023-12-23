@@ -12,6 +12,7 @@ import com.project.payload.mappers.StudentInfoDto;
 import com.project.payload.messages.ErrorMessages;
 import com.project.payload.messages.SuccessMessages;
 import com.project.payload.request.business.StudentInfoRequest;
+import com.project.payload.request.business.UpdateStudentInfoRequest;
 import com.project.payload.response.ResponseMessage;
 import com.project.payload.response.business.StudentInfoResponse;
 import com.project.repository.business.StudentInfoRepository;
@@ -27,6 +28,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -131,11 +134,59 @@ public class StudentInfoService {
     }
 
     public Page<StudentInfoResponse> getAllStudentInfoByPage(int page, int size, String sort, String type) {
-       Pageable pageable= pageableHelper.getPageableWithProperties(page, size, sort, type);
-       return studentInfoRepository.findAll(pageable).map(studentInfoDto::mapStudentInfoToStudentInfoResponse);
+        Pageable pageable = pageableHelper.getPageableWithProperties(page, size, sort, type);
+        return studentInfoRepository.findAll(pageable).map(studentInfoDto::mapStudentInfoToStudentInfoResponse);
     }
 
     public StudentInfoResponse getStudentInfoById(Long studentInfoId) {
         return studentInfoDto.mapStudentInfoToStudentInfoResponse(isStudentInfoExistById(studentInfoId));
+    }
+
+    public ResponseMessage<StudentInfoResponse> update(UpdateStudentInfoRequest studentInfoRequest, Long studentInfoId) {
+
+        Lesson lesson =lessonService.isLessonExistById(studentInfoRequest.getLessonId());
+        StudentInfo studentInfo = isStudentInfoExistById(studentInfoId);
+        EducationTerm educationTerm =
+                educationTermService.findEducationTermById(studentInfoRequest.getEducationTermId());
+        Double noteAverage =
+                calculateExamAverage(studentInfoRequest.getMidtermExam(), studentInfoRequest.getFinalExam());
+        Note note = checkLetterGrade(noteAverage);
+        StudentInfo studentInfoForUpdate = studentInfoDto.mapStudentInfoUpdateToStudentInfo(studentInfoRequest, studentInfoId,
+                lesson, educationTerm,
+                note,noteAverage);
+
+        studentInfoForUpdate.setTeacher(studentInfo.getTeacher());
+        studentInfoForUpdate.setStudent(studentInfo.getStudent());
+
+        StudentInfo updatedStudentInfo =  studentInfoRepository.save(studentInfoForUpdate);
+
+        return ResponseMessage.<StudentInfoResponse>builder()
+                .message(SuccessMessages.STUDENT_INFO_UPDATE)
+                .status(HttpStatus.OK)
+                .object(studentInfoDto.mapStudentInfoToStudentInfoResponse(updatedStudentInfo))
+                .build();
+
+    }
+
+    public Page<StudentInfoResponse> getAllForTeacher(HttpServletRequest request, int page, int size) {
+       Pageable pageable= pageableHelper.getPageableWithProperties(page,size);
+       String username= (String) request.getAttribute("username");
+       return studentInfoRepository.findByTeacherId_UsernameEquals(username,pageable).map(studentInfoDto::mapStudentInfoToStudentInfoResponse);
+
+    }
+
+    public Page<StudentInfoResponse> getAllForStudent(HttpServletRequest request, int page, int size) {
+        Pageable pageable= pageableHelper.getPageableWithProperties(page,size);
+        String username= (String) request.getAttribute("username");
+        return studentInfoRepository.findByStudentId_UsernameEquals(username,pageable).map(studentInfoDto::mapStudentInfoToStudentInfoResponse);
+    }
+
+    public List<StudentInfoResponse> findStudentInfoByStudentId(Long studentId) {
+        User student= methodHelper.isUserExist(studentId);
+        methodHelper.checkRole(student,RoleType.STUDENT);
+        return studentInfoRepository.findByStudent_IdEquals(studentId)
+                .stream()
+                .map(studentInfoDto::mapStudentInfoToStudentInfoResponse)
+                .collect(Collectors.toList());
     }
 }
