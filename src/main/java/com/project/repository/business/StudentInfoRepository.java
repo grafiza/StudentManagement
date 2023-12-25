@@ -17,7 +17,7 @@ public interface StudentInfoRepository extends JpaRepository<StudentInfo, Long> 
     boolean existsByIdEquals(Long id);
 
     @Query("SELECT s FROM StudentInfo s WHERE s.teacher.username=?1")
-    Page<StudentInfo> findByTeacherId_UsernameEquals(String username, Pageable pageable);
+    Page<StudentInfo>  findByTeacherId_UsernameEquals(String username, Pageable pageable);
 
     @Query("SELECT s FROM StudentInfo s WHERE s.student.username=?1")
     Page<StudentInfo> findByStudentId_UsernameEquals(String username, Pageable pageable);

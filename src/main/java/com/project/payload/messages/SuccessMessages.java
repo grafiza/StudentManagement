@@ -38,4 +38,5 @@ public class SuccessMessages {
 
     public static final String STUDENT_INFO_UPDATE = "Student Info is updated Successfully";
     public static final String MEET_SAVE = "Meet is saved Successfully";
+    public static final String MEET_DELETE_MESSAGE = "Meet is deleted Successfully";
 }

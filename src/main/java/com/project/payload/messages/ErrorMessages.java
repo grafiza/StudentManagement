@@ -48,4 +48,7 @@ public class ErrorMessages {
 
     public static final String MEET_HOURS_CONFLICT = "Error: Meet hours has conflict with existing meets";
 
+    public static final String NOT_FOUND_MEET_MESSAGE = "Error: Meet not found with id : %s";
+
+
 }

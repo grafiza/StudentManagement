@@ -151,7 +151,8 @@ public class StudentInfoService {
         Double noteAverage =
                 calculateExamAverage(studentInfoRequest.getMidtermExam(), studentInfoRequest.getFinalExam());
         Note note = checkLetterGrade(noteAverage);
-        StudentInfo studentInfoForUpdate = studentInfoDto.mapStudentInfoUpdateToStudentInfo(studentInfoRequest, studentInfoId,
+        StudentInfo studentInfoForUpdate = studentInfoDto.mapStudentInfoUpdateToStudentInfo(studentInfoRequest,
+                studentInfoId,
                 lesson, educationTerm,
                 note,noteAverage);
 
@@ -171,14 +172,16 @@ public class StudentInfoService {
     public Page<StudentInfoResponse> getAllForTeacher(HttpServletRequest request, int page, int size) {
        Pageable pageable= pageableHelper.getPageableWithProperties(page,size);
        String username= (String) request.getAttribute("username");
-       return studentInfoRepository.findByTeacherId_UsernameEquals(username,pageable).map(studentInfoDto::mapStudentInfoToStudentInfoResponse);
+       return studentInfoRepository.findByTeacherId_UsernameEquals(username,pageable).
+               map(studentInfoDto::mapStudentInfoToStudentInfoResponse);
 
     }
 
     public Page<StudentInfoResponse> getAllForStudent(HttpServletRequest request, int page, int size) {
         Pageable pageable= pageableHelper.getPageableWithProperties(page,size);
         String username= (String) request.getAttribute("username");
-        return studentInfoRepository.findByStudentId_UsernameEquals(username,pageable).map(studentInfoDto::mapStudentInfoToStudentInfoResponse);
+        return studentInfoRepository.findByStudentId_UsernameEquals(username,pageable).
+                map(studentInfoDto::mapStudentInfoToStudentInfoResponse);
     }
 
     public List<StudentInfoResponse> findStudentInfoByStudentId(Long studentId) {
