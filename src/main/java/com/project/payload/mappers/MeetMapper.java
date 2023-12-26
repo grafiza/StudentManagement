@@ -18,6 +18,7 @@ public class MeetMapper {
                 .description(meetRequest.getDescription())
                 .build();
     }
+
     public MeetResponse mapMeetToMeetResponse(Meet savedMeet) {
         return MeetResponse.builder()
                 .id(savedMeet.getId())
@@ -30,5 +31,16 @@ public class MeetMapper {
                 .teacherName(savedMeet.getAdvisoryTeacher().getName())
                 .students(savedMeet.getStudentList())
                 .build();
+    }
+
+    public Meet mapMeetUpdateRequestToMeet(MeetRequest updateMeetRequest, Long meetId) {
+        return Meet.builder()
+                .id(meetId)
+                .startTime(updateMeetRequest.getStartTime())
+                .stopTime(updateMeetRequest.getStopTime())
+                .date(updateMeetRequest.getDate())
+                .description(updateMeetRequest.getDescription())
+                .build();
+
     }
 }

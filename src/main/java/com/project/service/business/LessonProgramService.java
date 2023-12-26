@@ -16,10 +16,8 @@ import com.project.repository.business.LessonProgramRepository;
 import com.project.repository.business.LessonRepository;
 import com.project.service.helper.MethodHelper;
 import com.project.service.helper.PageableHelper;
-import com.project.service.user.StudentService;
 import com.project.service.validator.DateTimeValidator;
 import lombok.RequiredArgsConstructor;
-import net.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -43,12 +41,12 @@ public class LessonProgramService {
     private final MethodHelper methodHelper;
 
     public ResponseMessage<LessonProgramResponse> saveLessonProgram(LessonProgramRequest lessonProgramRequest) {
-        Set<Lesson> lessons = lessonService.getAllLessonByLessonId(lessonProgramRequest.getLessonIdList());
+        Set<Lesson> lessons =  lessonService.getAllLessonByLessonId(lessonProgramRequest.getLessonIdList());
         EducationTerm educationTerm = educationTermService.findEducationTermById(
                 lessonProgramRequest.getEducationTermId());
 
         //!!! yukarda gelen lessons ici bos ise
-        if (lessons.isEmpty()) {
+        if(lessons.isEmpty()){
             throw new ResourceNotFoundException(ErrorMessages.NOT_FOUND_LESSON_IN_LIST);
         }
 
@@ -57,17 +55,21 @@ public class LessonProgramService {
                 lessonProgramRequest.getStopTime());
 
         //!!! DTO --> POJO
-        LessonProgram LessonProgram = lessonProgramMapper.mapLessonProgramRequestToLessonProgram(lessonProgramRequest, lessons, educationTerm);
-        LessonProgram savedLessonPRogram = lessonProgramRepository.save(LessonProgram);
+        LessonProgram lessonProgram =
+                lessonProgramMapper.mapLessonProgramRequestToLessonProgram(lessonProgramRequest,lessons,educationTerm);
+
+        LessonProgram savedLessonProgram = lessonProgramRepository.save(lessonProgram);
+
         return ResponseMessage.<LessonProgramResponse>builder()
                 .message(SuccessMessages.LESSON_PROGRAM_SAVE)
                 .status(HttpStatus.CREATED)
-                .object(lessonProgramMapper.mapLessonProgramToLessonProgramResponse(savedLessonPRogram))
+                .object(lessonProgramMapper.mapLessonProgramToLessonProgramResponse(savedLessonProgram))
                 .build();
     }
 
     public List<LessonProgramResponse> getAllLessonPrograms() {
-        return lessonProgramRepository.findAll()
+        return lessonProgramRepository
+                .findAll()
                 .stream()
                 .map(lessonProgramMapper::mapLessonProgramToLessonProgramResponse)
                 .collect(Collectors.toList());
@@ -77,28 +79,30 @@ public class LessonProgramService {
         return lessonProgramMapper.mapLessonProgramToLessonProgramResponse(isLessonProgramExistById(id));
     }
 
-    private LessonProgram isLessonProgramExistById(Long id) {
-        return lessonProgramRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException(String.format(ErrorMessages.NOT_FOUND_LESSON_PROGRAM_MESSAGE, id)));
+    private LessonProgram isLessonProgramExistById(Long id){
+        return lessonProgramRepository.findById(id).orElseThrow(()->
+                new ResourceNotFoundException(String.format(ErrorMessages.NOT_FOUND_LESSON_PROGRAM_MESSAGE,id)));
     }
 
     public List<LessonProgramResponse> getAllUnassigned() {
-        return lessonProgramRepository.findByUsers_IdNull().
-                stream().
-                map(lessonProgramMapper::mapLessonProgramToLessonProgramResponse).
-                collect(Collectors.toList());
+        return lessonProgramRepository.findByUsers_IdNull()
+                .stream()
+                .map(lessonProgramMapper::mapLessonProgramToLessonProgramResponse)
+                .collect(Collectors.toList());
     }
 
     public List<LessonProgramResponse> getAllAssigned() {
-        return lessonProgramRepository.findByUsers_IdNotNull().
-                stream().
-                map(lessonProgramMapper::mapLessonProgramToLessonProgramResponse).
-                collect(Collectors.toList());
+
+        return lessonProgramRepository.findByUsers_IdNotNull()
+                .stream()
+                .map(lessonProgramMapper::mapLessonProgramToLessonProgramResponse)
+                .collect(Collectors.toList());
     }
 
     public ResponseMessage deleteLessonProgramById(Long id) {
         isLessonProgramExistById(id);
         lessonProgramRepository.deleteById(id);
+
         return ResponseMessage.builder()
                 .message(SuccessMessages.LESSON_PROGRAM_DELETE)
                 .status(HttpStatus.OK)
@@ -106,40 +110,48 @@ public class LessonProgramService {
     }
 
     public Page<LessonProgramResponse> getAllLessonProgramWithPage(int page, int size, String sort, String type) {
-        Pageable pageable = pageableHelper.getPageableWithProperties(page, size, sort, type);
-        return lessonProgramRepository.findAll(pageable).map(lessonProgramMapper::mapLessonProgramToLessonProgramResponse);
+        Pageable pageable =  pageableHelper.getPageableWithProperties(page, size, sort, type);
+        return lessonProgramRepository.findAll(pageable)
+                .map(lessonProgramMapper::mapLessonProgramToLessonProgramResponse);
     }
 
-    public Set<LessonProgramResponse> getAllLessonProgramByUser(HttpServletRequest request) {
-        String username = (String) request.getAttribute("username");
-        return lessonProgramRepository.getLessonProgramByUsersUsername(username).
-                stream().
-                map(lessonProgramMapper::mapLessonProgramToLessonProgramResponse).
-                collect(Collectors.toSet());
+    public Set<LessonProgramResponse> getAllLessonProgramByUser(HttpServletRequest httpServletRequest) {
+        String userName = (String) httpServletRequest.getAttribute("username");
+
+        return lessonProgramRepository.getLessonProgramByUsersUsername(userName)
+                .stream()
+                .map(lessonProgramMapper::mapLessonProgramToLessonProgramResponse)
+                .collect(Collectors.toSet());
     }
 
-
-    public Set<LessonProgramResponse> getLessonProgramsByTeacherId(Long id) {
-        User teacher = methodHelper.isUserExist(id);
-        methodHelper.checkRole(teacher, RoleType.TEACHER);
-        return lessonProgramRepository.getLessonProgramByUserId(id).stream()
-                .map(lessonProgramMapper::mapLessonProgramToLessonProgramResponse).collect(Collectors.toSet());
-
-    }
-
-    public Set<LessonProgramResponse> getLessonProgramsByStudentId(Long id) {
-        User student = methodHelper.isUserExist(id);
-        methodHelper.checkRole(student, RoleType.TEACHER);
-        return lessonProgramRepository.getLessonProgramByUserId(id).stream()
-                .map(lessonProgramMapper::mapLessonProgramToLessonProgramResponse).collect(Collectors.toSet());
-    }
-
-    //Teacher service için yazıldı
+    //!!! TeacherService icin yazildi
     public Set<LessonProgram> getLessonProgramById(Set<Long> lessonIdSet){
-      Set<LessonProgram> lessonProgramSet=  lessonProgramRepository.getLessonProgramByLessonProgramIdList(lessonIdSet);
-      if(lessonProgramSet.isEmpty()){
-          throw new ResourceNotFoundException(ErrorMessages.NOT_FOUND_LESSON_PROGRAM_MESSAGE_WITHOUT_ID_LIST);
-      }
-      return lessonProgramSet;
+        Set<LessonProgram> lessonPrograms = lessonProgramRepository.getLessonProgramByLessonProgramIdList(lessonIdSet);
+
+        if(lessonPrograms.isEmpty()){
+            throw new ResourceNotFoundException(ErrorMessages.NOT_FOUND_LESSON_PROGRAM_MESSAGE_WITHOUT_ID_LIST);
+        }
+
+        return lessonPrograms;
+    }
+
+    public Set<LessonProgramResponse> getByTeacherId(Long teacherId) {
+        User teacher = methodHelper.isUserExist(teacherId);
+        methodHelper.checkRole(teacher, RoleType.TEACHER);
+
+        return lessonProgramRepository.findByUsers_IdEquals(teacherId) // Derived
+                .stream()
+                .map(lessonProgramMapper::mapLessonProgramToLessonProgramResponse)
+                .collect(Collectors.toSet());
+    }
+
+    public Set<LessonProgramResponse> getByStudentId(Long studentId) {
+        User student = methodHelper.isUserExist(studentId);
+        methodHelper.checkRole(student,RoleType.STUDENT);
+
+        return lessonProgramRepository.findByUsers_IdEquals(studentId)// yukarda yazilan
+                .stream()
+                .map(lessonProgramMapper::mapLessonProgramToLessonProgramResponse)
+                .collect(Collectors.toSet());
     }
 }

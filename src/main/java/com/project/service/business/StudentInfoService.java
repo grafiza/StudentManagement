@@ -64,7 +64,7 @@ public class StudentInfoService {
         //TODO brans kontrolu
         //!!! ayni ders icin duclicate kontrolu
         checkSameLesson(studentInfoRequest.getStudentId(), lesson.getLessonName());
-        Note note = checkLetterGrade(calculateExamAverage(studentInfoRequest.getMidtermExam(),
+        Note note =  checkLetterGrade(calculateExamAverage(studentInfoRequest.getMidtermExam(),
                 studentInfoRequest.getFinalExam()));
 
         //!!! DTO --> POJO
@@ -86,51 +86,57 @@ public class StudentInfoService {
                 .build();
     }
 
-    private void checkSameLesson(Long studentId, String lessonName) {
+    private void checkSameLesson(Long studentId, String lessonName){
         boolean isLessonDuplicationExist = studentInfoRepository.getAllByStudentId_Id(studentId)
                 .stream()
                 .anyMatch(e -> e.getLesson().getLessonName().equalsIgnoreCase(lessonName));
 
-        if (isLessonDuplicationExist) {
-            throw new ConflictException(String.format(ErrorMessages.ALREADY_EXIST_LESSON_WITH_LESSON_NAME_MESSAGE, lessonName));
+        if(isLessonDuplicationExist){
+            throw new ConflictException(String.format(ErrorMessages.ALREADY_EXIST_LESSON_WITH_LESSON_NAME_MESSAGE,lessonName));
         }
     }
 
-    private Double calculateExamAverage(Double midtermExam, Double finalExam) {
-        return ((midtermExam * midtermExamPercentage) + (finalExam * finalExamPercentage));
+    private Double calculateExamAverage(Double midtermExam, Double finalExam){
+        return ( (midtermExam * midtermExamPercentage) + (finalExam * finalExamPercentage) );
     }
 
-    private Note checkLetterGrade(Double average) {
-        if (average < 50.0) {
+    private Note checkLetterGrade(Double average){
+        if(average<50.0){
             return Note.FF;
-        } else if (average < 60) {
+        } else if (average<60) {
             return Note.DD;
-        } else if (average < 65) {
+        } else if (average<65) {
             return Note.CC;
-        } else if (average < 70) {
+        } else if (average<70) {
             return Note.CB;
-        } else if (average < 75) {
+        } else if (average<75) {
             return Note.BB;
-        } else if (average < 80) {
+        } else if (average<80) {
             return Note.BA;
         } else {
             return Note.AA;
         }
     }
 
-    public ResponseMessage deleteStudentInfoById(Long studentInfoId) {
+    public ResponseMessage deleteStudentInfo(Long studentInfoId) {
+
         StudentInfo studentInfo = isStudentInfoExistById(studentInfoId);
-        studentInfoRepository.delete(studentInfo);
+        studentInfoRepository.deleteById(studentInfo.getId());
+
         return ResponseMessage.builder()
-                .message(SuccessMessages.STUDENT_INFO_DELETED)
+                .message(SuccessMessages.STUDENT_INFO_DELETE)
                 .status(HttpStatus.OK)
                 .build();
+
     }
 
-    public StudentInfo isStudentInfoExistById(Long id) {
-        if (!studentInfoRepository.existsByIdEquals(id)) {
-            throw new ResourceNotFoundException(String.format(ErrorMessages.STUDENT_INFO_NOT_FOUND, id));
-        } else return studentInfoRepository.findById(id).get();
+    public StudentInfo isStudentInfoExistById(Long id){
+        boolean isExist = studentInfoRepository.existsByIdEquals(id);
+        if(!isExist){
+            throw new ResourceNotFoundException(String.format(ErrorMessages.STUDENT_INFO_NOT_FOUND,id));
+        } else {
+            return  studentInfoRepository.findById(id).get();
+        }
     }
 
     public Page<StudentInfoResponse> getAllStudentInfoByPage(int page, int size, String sort, String type) {
@@ -139,6 +145,7 @@ public class StudentInfoService {
     }
 
     public StudentInfoResponse getStudentInfoById(Long studentInfoId) {
+
         return studentInfoDto.mapStudentInfoToStudentInfoResponse(isStudentInfoExistById(studentInfoId));
     }
 
@@ -151,8 +158,7 @@ public class StudentInfoService {
         Double noteAverage =
                 calculateExamAverage(studentInfoRequest.getMidtermExam(), studentInfoRequest.getFinalExam());
         Note note = checkLetterGrade(noteAverage);
-        StudentInfo studentInfoForUpdate = studentInfoDto.mapStudentInfoUpdateToStudentInfo(studentInfoRequest,
-                studentInfoId,
+        StudentInfo studentInfoForUpdate = studentInfoDto.mapStudentInfoUpdateToStudentInfo(studentInfoRequest, studentInfoId,
                 lesson, educationTerm,
                 note,noteAverage);
 
@@ -169,24 +175,26 @@ public class StudentInfoService {
 
     }
 
-    public Page<StudentInfoResponse> getAllForTeacher(HttpServletRequest request, int page, int size) {
-       Pageable pageable= pageableHelper.getPageableWithProperties(page,size);
-       String username= (String) request.getAttribute("username");
-       return studentInfoRepository.findByTeacherId_UsernameEquals(username,pageable).
-               map(studentInfoDto::mapStudentInfoToStudentInfoResponse);
+    public Page<StudentInfoResponse> getAllForTeacher(HttpServletRequest httpServletRequest, int page, int size) {
+        Pageable pageable = pageableHelper.getPageableWithProperties(page, size);
+        String username = (String) httpServletRequest.getAttribute("username");
 
+        return studentInfoRepository.findByTeacherId_UsernameEquals(username, pageable)
+                .map(studentInfoDto::mapStudentInfoToStudentInfoResponse);
     }
 
-    public Page<StudentInfoResponse> getAllForStudent(HttpServletRequest request, int page, int size) {
-        Pageable pageable= pageableHelper.getPageableWithProperties(page,size);
-        String username= (String) request.getAttribute("username");
-        return studentInfoRepository.findByStudentId_UsernameEquals(username,pageable).
-                map(studentInfoDto::mapStudentInfoToStudentInfoResponse);
+    public Page<StudentInfoResponse> getAllForStudent(HttpServletRequest httpServletRequest, int page, int size) {
+        Pageable pageable = pageableHelper.getPageableWithProperties(page, size);
+        String username = (String) httpServletRequest.getAttribute("username");
+
+        return studentInfoRepository.findByStudentId_UsernameEquals(username, pageable)
+                .map(studentInfoDto::mapStudentInfoToStudentInfoResponse);
     }
 
     public List<StudentInfoResponse> findStudentInfoByStudentId(Long studentId) {
-        User student= methodHelper.isUserExist(studentId);
-        methodHelper.checkRole(student,RoleType.STUDENT);
+        User student = methodHelper.isUserExist(studentId);
+        methodHelper.checkRole(student, RoleType.STUDENT);
+
         return studentInfoRepository.findByStudent_IdEquals(studentId)
                 .stream()
                 .map(studentInfoDto::mapStudentInfoToStudentInfoResponse)
